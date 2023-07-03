@@ -1,0 +1,929 @@
+Login Form
+Imports System.Data.OleDb
+Public Class LoginForm
+Dim Connect As OleDbConnection = New OleDbConnection("Provider=Microsoft.ACE.OLEDB.12.0;Data Source=C:\Users\User\Desktop\Prototype-WH\WizHealthV2.accdb")
+Dim cmd As New OleDbCommand
+Dim DbReader As OleDbDataReader
+Private Sub LoginForm_Load(sender As Object, e As EventArgs) Handles MyBase.Load
+Dim fontcolor As Color
+fontcolor = Color.FromArgb(69, 69, 69)
+UserBox.Text = "Username"
+UserBox.ForeColor = fontcolor
+Dim fontcolorP As Color
+fontcolorP = Color.FromArgb(69, 69, 69)
+PasswordBox.Text = "Password"
+PasswordBox.ForeColor = fontcolorP
+Dim fontcolorU As Color
+fontcolorU = Color.FromArgb(69, 69, 69)
+UserType.Text = "User Type"
+UserType.ForeColor = fontcolorU
+End Sub
+Private Sub LinkLabel1_LinkClicked(sender As Object, e As LinkLabelLinkClickedEventArgs) Handles LinkLabel1.LinkClicked
+Me.Hide()
+RegistrationForm.Show()
+UserBox.Clear()
+PasswordBox.Clear()
+UserType.Text = "User Type"
+End Sub
+Private Sub MinimizeBtn_Click(sender As Object, e As EventArgs) Handles MinimizeBtn.Click
+WindowState = FormWindowState.Minimized
+End Sub
+Private Sub CloseBtn_Click(sender As Object, e As EventArgs) Handles CloseBtn.Click
+Dim exit1 As String
+exit1 = MsgBox("Are you sure you want to exit?", MsgBoxStyle.Exclamation + MsgBoxStyle.YesNo, "Exit Application")
+If exit1 = vbYes Then
+Application.Exit()
+ElseIf exit1 = vbNo Then
+End If
+End Sub
+69
+Private Sub CheckBox1_CheckedChanged(sender As Object, e As EventArgs) Handles CheckBox1.CheckedChanged
+If CheckBox1.Checked = True Then
+PasswordBox.UseSystemPasswordChar = False
+Else
+PasswordBox.UseSystemPasswordChar = True
+End If
+End Sub
+Private Sub LoginBtn_Click(sender As Object, e As EventArgs) Handles LoginBtn.Click
+login()
+End Sub
+Private Sub UserBox_MouseClick(sender As Object, e As MouseEventArgs) Handles UserBox.MouseClick
+Dim fontcolor As Color
+fontcolor = Color.FromArgb(69, 69, 69)
+If UserBox.Text = "Username" Then
+UserBox.Text = ""
+UserBox.ForeColor = fontcolor
+End If
+End Sub
+Private Sub PasswordBox_MouseClick(sender As Object, e As MouseEventArgs) Handles PasswordBox.MouseClick
+Dim fontcolor As Color
+fontcolor = Color.FromArgb(69, 69, 69)
+If PasswordBox.Text = "Password" Then
+PasswordBox.Text = ""
+PasswordBox.ForeColor = fontcolor
+End If
+End Sub
+Private Sub UserBox_MouseLeave(sender As Object, e As EventArgs) Handles UserBox.MouseLeave
+Dim fontcolor As Color
+fontcolor = Color.FromArgb(69, 69, 69)
+If UserBox.Text = "" Then
+UserBox.Text = "Username"
+UserBox.ForeColor = fontcolor
+End If
+End Sub
+Private Sub PasswordBox_MouseLeave(sender As Object, e As EventArgs) Handles PasswordBox.MouseLeave
+Dim fontcolor As Color
+fontcolor = Color.FromArgb(69, 69, 69)
+If PasswordBox.Text = "" Then
+PasswordBox.Text = "Password"
+PasswordBox.ForeColor = fontcolor
+End If
+End Sub
+Private Sub login()
+If UserBox.Text = Nothing Or PasswordBox.Text = Nothing Then
+MessageBox.Show("Please Fill up empty fields", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error)
+End If
+70
+If UserType.Text = "Admin" Then
+If Connect.State = ConnectionState.Closed Then
+Connect.Open()
+End If
+Using login As New OleDbCommand("SELECT COUNT (*) FROM tblAdmin WHERE [Username] = @Username AND [Password] = @Password", Connect)
+login.Parameters.AddWithValue("@Username", OleDbType.VarChar).Value = UserBox.Text.Trim
+login.Parameters.AddWithValue("@Password", OleDbType.VarChar).Value = PasswordBox.Text.Trim
+Dim logincount = Convert.ToInt32(login.ExecuteScalar)
+If logincount > 0 Then
+Loading.ShowDialog()
+UserBox.Clear()
+PasswordBox.Clear()
+Me.Hide()
+Else
+MessageBox.Show("Invalid Credentials", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error)
+UserBox.Clear()
+PasswordBox.Clear()
+End If
+End Using
+Connect.Close()
+ElseIf UserType.Text = "Patient" Then
+If Connect.State = ConnectionState.Closed Then
+Connect.Open()
+End If
+Using login As New OleDbCommand("SELECT COUNT (*) FROM tblPatient WHERE [Username] = @Username AND [Password] = @Password", Connect)
+Dim userkey As New ProfileForm
+Dim userkey1 As New EditProfile
+Dim userkey2 As New AccountSettings
+Dim userkey3 As New MyMedicalHistory
+Dim userkey4 As New MedicalHistoryForm
+Dim userkey5 As New Consultation
+ProfileForm.userkey = UserBox.Text
+EditProfile.userkey1 = UserBox.Text
+AccountSettings.userkey2 = UserBox.Text
+MyMedicalHistory.userkey3 = UserBox.Text
+MedicalHistoryForm.userkey4 = UserBox.Text
+Consultation.userkey5 = UserBox.Text
+login.Parameters.AddWithValue("@Username", OleDbType.VarChar).Value = UserBox.Text.Trim
+login.Parameters.AddWithValue("@Password", OleDbType.VarChar).Value = PasswordBox.Text.Trim
+Dim logincount = Convert.ToInt32(login.ExecuteScalar)
+If logincount > 0 Then
+UserBox.Clear()
+PasswordBox.Clear()
+Loading2.ShowDialog()
+71
+Me.Hide()
+Else
+MessageBox.Show("Invalid Credentials", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error)
+UserBox.Clear()
+PasswordBox.Clear()
+End If
+End Using
+Connect.Close()
+Else
+MessageBox.Show("Please select user type", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error)
+End If
+End Sub
+End Class
+Registration Form
+Imports System.Data.OleDb
+Public Class RegistrationForm
+Dim con As New OleDbConnection
+Dim dbProvider As String = "Provider=Microsoft.ACE.OLEDB.12.0;"
+Dim dbSource As String = "Data Source=C:\Users\User\Desktop\Prototype-WH\WizHealthV2.accdb"
+Private Sub RegistrationForm_Load(sender As Object, e As EventArgs) Handles MyBase.Load
+con.ConnectionString = dbProvider & dbSource
+Dim pbImage As Image = WizHealthV2.My.Resources.Resources.default_user_profile_image_png_2_Transparent_Images
+DOB.Format = DateTimePickerFormat.Custom
+GenderReg.Text = "Select from..."
+CivilBox.Text = "Select from..."
+End Sub
+Private Sub BackBtn_Click(sender As Object, e As EventArgs) Handles BackBtn.Click
+Dim exit2 As String
+exit2 = MsgBox("Are you sure you want to cancel Registration?", MsgBoxStyle.Exclamation + MsgBoxStyle.YesNo, "Cancel")
+If exit2 = vbYes Then
+Me.Close()
+LoginForm.Show()
+ElseIf exit2 = vbNo Then
+MsgBox("Please Enter Required Information", MsgBoxStyle.Information, "")
+End If
+End Sub
+Private Sub ClearBtn2_Click(sender As Object, e As EventArgs) Handles ClearBtn2.Click
+72
+SurnameReg.Clear()
+NameReg.Clear()
+OccupationReg.Clear()
+ContactReg.Clear()
+EmailReg.Clear()
+StreetReg.Clear()
+CityReg.Clear()
+ProvinceReg.Clear()
+UserBox.Clear()
+PasswordBox.Clear()
+GenderReg.Text = "Select from..."
+CivilBox.Text = "Select from..."
+DOB.Text = DateTime.Today
+End Sub
+Private Sub CheckBox2_CheckedChanged(sender As Object, e As EventArgs) Handles CheckBox2.CheckedChanged
+If CheckBox2.Checked = True Then
+PasswordBox.UseSystemPasswordChar = False
+Else
+PasswordBox.UseSystemPasswordChar = True
+End If
+End Sub
+Private Sub RegisterBtn_Click_1(sender As Object, e As EventArgs) Handles RegisterBtn.Click
+If UserBox.Text = "" Or PasswordBox.Text = "" Or NameReg.Text = "" Or SurnameReg.Text = "" Or GenderReg.Text = "Select from..." Or CivilBox.Text = "Select from..." Or OccupationReg.Text = "" Or
+ContactReg.Text = "" Or EmailReg.Text = "" Or StreetReg.Text = "" Or CityReg.Text = "" Or ProvinceReg.Text = "" Then
+MessageBox.Show("Please Fill up empty fields", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error)
+ElseIf DOB.Value.Date = DateTime.Today Then
+MessageBox.Show("Please don't select the date today", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error)
+ElseIf ContactReg.Text.Length < 11 Or ContactReg.Text.Length > 11 Then
+MessageBox.Show("Phone number must be 11 digits long", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error)
+ContactReg.Focus()
+Else
+If con.State = ConnectionState.Closed Then
+con.Open()
+End If
+Using cmd As New OleDbCommand("SELECT COUNT (*) FROM tblPatient WHERE [Username] = @Username AND [Password] = @Password", con)
+cmd.Parameters.AddWithValue("@USERNAME", OleDbType.VarChar).Value = UserBox.Text.Trim
+cmd.Parameters.AddWithValue("@PASSWORD", OleDbType.VarChar).Value = PasswordBox.Text.Trim
+Dim count = Convert.ToInt32(cmd.ExecuteScalar)
+If count > 0 Then
+MessageBox.Show("The username has already been taken", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error)
+Exit Sub
+End If
+End Using
+73
+Using create As New OleDbCommand("INSERT INTO tblPatient([Username],[Password],[FirstName],[Surname],[Gender],[DateofBirth],[CivilStatus],[Number],[Email],[Address],[Occupation])
+VALUES(@Username,@Password,@FirstName,@Surname,@Gender,@DateofBirth,@CivilStatus,@Number,@Email,@Address,@Occupation)", con)
+create.Parameters.AddWithValue("@Username", OleDbType.VarChar).Value = UserBox.Text.Trim
+create.Parameters.AddWithValue("@Password", OleDbType.VarChar).Value = PasswordBox.Text.Trim
+create.Parameters.AddWithValue("@FirstName", OleDbType.VarChar).Value = NameReg.Text.Trim
+create.Parameters.AddWithValue("@Surname", OleDbType.VarChar).Value = SurnameReg.Text.Trim
+create.Parameters.AddWithValue("@Gender", OleDbType.VarChar).Value = GenderReg.Text.Trim
+create.Parameters.AddWithValue("@DateofBirth", OleDbType.VarChar).Value = DOB.Text.Trim
+create.Parameters.AddWithValue("@CivilStatus", OleDbType.VarChar).Value = CivilBox.Text.Trim
+create.Parameters.AddWithValue("@Number", OleDbType.VarChar).Value = ContactReg.Text.ToString
+create.Parameters.AddWithValue("@Email", OleDbType.VarChar).Value = EmailReg.Text.Trim
+create.Parameters.AddWithValue("@Address", OleDbType.VarChar).Value = StreetReg.Text.Trim + " " + CityReg.Text.Trim + " " + ProvinceReg.Text.Trim
+create.Parameters.AddWithValue("@Occupation", OleDbType.VarChar).Value = OccupationReg.Text.Trim
+If create.ExecuteNonQuery Then
+MessageBox.Show("Account created!!", "Information", MessageBoxButtons.OK, MessageBoxIcon.Information)
+UserBox.Clear()
+PasswordBox.Clear()
+NameReg.Clear()
+SurnameReg.Clear()
+GenderReg.Text = "Select from..."
+CivilBox.Text = "Select from..."
+OccupationReg.Clear()
+ContactReg.Clear()
+EmailReg.Clear()
+StreetReg.Clear()
+CityReg.Clear()
+ProvinceReg.Clear()
+DOB.Text = DateTime.Today
+End If
+con.Close()
+End Using
+Me.Close()
+LoginForm.Show()
+End If
+End Sub
+End Class
+74
+Admin Dashboard
+Public Class AdminDashboard
+Public Shared userkey
+Private CurrentChildForm As Form
+Private Sub OpenChildForm(childForm As Form)
+If CurrentChildForm IsNot Nothing Then
+CurrentChildForm.Close()
+End If
+CurrentChildForm = childForm
+childForm.TopLevel = False
+childForm.FormBorderStyle = FormBorderStyle.None
+childForm.Dock = DockStyle.Fill
+PanelDesktop.Controls.Add(childForm)
+PanelDesktop.Tag = childForm
+childForm.BringToFront()
+childForm.Show()
+End Sub
+Private Sub AdminDashboard_Load(sender As Object, e As EventArgs) Handles MyBase.Load
+DateTime.Enabled = True
+WelcomeLbl.Text = userkey
+hideSubmenu()
+End Sub
+Private Sub DateTime_Tick(sender As Object, e As EventArgs) Handles DateTime.Tick
+LblTime.Text = Date.Now.ToString("hh:mm:ss tt")
+LblDate.Text = Date.Now.ToString("dd MMM yyyy")
+End Sub
+Private Sub hideSubmenu()
+SubPatientPanel.Visible = False
+End Sub
+Private Sub showSubmenu(submenu As Panel)
+If submenu.Visible = False Then
+hideSubmenu()
+submenu.Visible = True
+Else
+submenu.Visible = False
+End If
+End Sub
+Private Sub OverviewBtn_Click(sender As Object, e As EventArgs) Handles OverviewBtn.Click
+OpenChildForm(New OverviewForm)
+hideSubmenu()
+End Sub
+Private Sub PatientBtn_Click(sender As Object, e As EventArgs) Handles PatientBtn.Click
+showSubmenu(SubPatientPanel)
+End Sub
+Private Sub AdminBtn_Click(sender As Object, e As EventArgs) Handles AdminBtn.Click
+OpenChildForm(New AdminForm)
+hideSubmenu()
+End Sub
+Private Sub PatientlistBtn_Click(sender As Object, e As EventArgs) Handles PatientlistBtn.Click
+OpenChildForm(New PatientProfile)
+End Sub
+75
+Private Sub ConsultationBtn_Click(sender As Object, e As EventArgs) Handles ConsultationBtn.Click
+OpenChildForm(New ConsultationList)
+End Sub
+Private Sub MedicineBtn_Click(sender As Object, e As EventArgs) Handles MedicineBtn.Click
+OpenChildForm(New MedicineForm)
+End Sub
+Private Sub MedicalHistory_Click(sender As Object, e As EventArgs) Handles MedicalHistory.Click
+OpenChildForm(New ArchiveForm)
+End Sub
+Private Sub LogoutBtn_Click(sender As Object, e As EventArgs) Handles LogoutBtn.Click
+Dim logout As String
+logout = MessageBox.Show("Are you sure you want to logout?", "Logout", MessageBoxButtons.YesNo, MessageBoxIcon.Question)
+If logout = vbYes Then
+Me.Close()
+LoginForm.Show()
+ElseIf logout = vbNo Then
+End If
+End Sub
+Private Sub MinimizeBtn_Click(sender As Object, e As EventArgs) Handles MinimizeBtn.Click
+WindowState = FormWindowState.Minimized
+End Sub
+Private Sub MaximizeBtn_Click(sender As Object, e As EventArgs) Handles MaximizeBtn.Click
+If WindowState = FormWindowState.Normal Then
+WindowState = FormWindowState.Maximized
+Else
+WindowState = FormWindowState.Normal
+End If
+End Sub
+Private Sub CloseBtn_Click(sender As Object, e As EventArgs) Handles CloseBtn.Click
+Dim exit1 As String
+exit1 = MsgBox("Are you sure you want to exit?", MsgBoxStyle.Exclamation + MsgBoxStyle.YesNo, "Exit Application")
+If exit1 = vbYes Then
+Application.Exit()
+ElseIf exit1 = vbNo Then
+End If
+End Sub
+End Class
+76
+Patient Profile (Admin Side)
+Imports System.Data.OleDb
+Public Class PatientProfile
+Private Sub PatientList_Load(sender As Object, e As EventArgs) Handles MyBase.Load
+'TODO: This line of code loads data into the 'WizHealthV2DataSet.tblPatient' table. You can move, or remove it, as needed.
+Me.TblPatientTableAdapter.Fill(Me.WizHealthV2DataSet.tblPatient)
+SearchBox.Text = "Search Firstname or Surname"
+End Sub
+Private Sub SearchBox_MouseClick(sender As Object, e As MouseEventArgs) Handles SearchBox.MouseClick
+Dim fontcolor As Color
+fontcolor = Color.FromArgb(69, 69, 69)
+If SearchBox.Text = "Search Firstname or Surname" Then
+SearchBox.Text = ""
+SearchBox.ForeColor = fontcolor
+End If
+End Sub
+Private Sub SearchBox_MouseLeave(sender As Object, e As EventArgs) Handles SearchBox.MouseLeave
+Dim fontcolor As Color
+fontcolor = Color.FromArgb(69, 69, 69)
+If SearchBox.Text = "" Then
+SearchBox.Text = "Search Firstname or Surname"
+SearchBox.ForeColor = fontcolor
+End If
+End Sub
+Private Sub SearchBox_TextChanged(sender As Object, e As EventArgs) Handles SearchBox.TextChanged
+Dim Search As String = SearchBox.Text
+Me.TblPatientTableAdapter.FillBySearch(Me.WizHealthV2DataSet.tblPatient, Search, Search)
+If SearchBox.Text = Nothing Or SearchBox.Text = "Search Firstname or Surname" Then
+Me.TblPatientTableAdapter.Fill(Me.WizHealthV2DataSet.tblPatient)
+End If
+End Sub
+Private Sub FirstBtn_Click(sender As Object, e As EventArgs) Handles FirstBtn.Click
+TblPatientBindingSource.MoveFirst()
+End Sub
+Private Sub PreviousBtn_Click(sender As Object, e As EventArgs) Handles PreviousBtn.Click
+TblPatientBindingSource.MovePrevious()
+End Sub
+Private Sub NextBtn_Click(sender As Object, e As EventArgs) Handles NextBtn.Click
+TblPatientBindingSource.MoveNext()
+End Sub
+Private Sub LastBtn_Click(sender As Object, e As EventArgs) Handles LastBtn.Click
+TblPatientBindingSource.MoveLast()
+77
+End Sub
+Public Shared Property selectedrowindex As DataGridViewRow
+Private Sub PatientGridView_CellDoubleClick_1(sender As Object, e As DataGridViewCellEventArgs) Handles PatientGridView.CellDoubleClick
+If e.RowIndex >= 0 Then
+selectedrowindex = PatientGridView.Rows(e.RowIndex)
+Dim ProfileForm1 As ProfileForm1 = New ProfileForm1
+ProfileForm1.ShowDialog()
+End If
+End Sub
+Private Sub ArchiveBtn_Click(sender As Object, e As EventArgs) Handles ArchiveBtn.Click
+Dim result As DialogResult
+result = MessageBox.Show("Do you want to Archive this Record?", "Archive Record", MessageBoxButtons.YesNo, MessageBoxIcon.Question)
+If (result = DialogResult.Yes) Then
+For i As Integer = 0 To PatientGridView.SelectedRows.Count - 1
+Dim maintable As String = "INSERT INTO tblArchive SELECT * FROM tblPatient WHERE [Username]=@Username"
+Using connect As OleDbConnection = New OleDbConnection("Provider=Microsoft.ACE.OLEDB.12.0;Data Source=C:\Users\User\Desktop\Prototype-WH\WizHealthV2.accdb")
+Using cmd As OleDbCommand = New OleDbCommand(maintable, connect)
+connect.Open()
+cmd.Parameters.AddWithValue("@Username", PatientGridView.SelectedRows(i).Cells(1).Value.ToString())
+cmd.ExecuteNonQuery()
+End Using
+connect.Close()
+End Using
+Dim delete As String = "DELETE FROM tblPatient WHERE [Username]=@Username"
+Using connect As OleDbConnection = New OleDbConnection("Provider=Microsoft.ACE.OLEDB.12.0;Data Source=C:\Users\User\Desktop\Prototype-WH\WizHealthV2.accdb")
+Using cmd1 As OleDbCommand = New OleDbCommand(delete, connect)
+connect.Open()
+cmd1.Parameters.AddWithValue("@Username", PatientGridView.SelectedRows(i).Cells(1).Value.ToString())
+cmd1.ExecuteNonQuery()
+MessageBox.Show("Record Archived", "Archive", MessageBoxButtons.OK, MessageBoxIcon.Information)
+End Using
+connect.Close()
+End Using
+Next
+Else
+Return
+End If
+End Sub
+End Class
+78
+Consultation Form
+Imports System.Data.OleDb
+Public Class ConsultationForm
+Public Shared patientkey
+Dim con As New OleDbConnection("Provider=Microsoft.ACE.OLEDB.12.0;Data Source=C:\Users\User\Desktop\Prototype-WH\WizHealthV2.accdb")
+Dim dr As OleDbDataReader
+Private Sub ConsultationForm_Load(sender As Object, e As EventArgs) Handles MyBase.Load
+UsernameLabel1.Text = ConsultationList.selectedrowindex.Cells(1).Value.ToString()
+DisplayData()
+con.Open()
+Dim cmd As New OleDbCommand("SELECT DISTINCT Medicine FROM tblMedicine", con)
+Dim myreader As OleDbDataReader = cmd.ExecuteReader
+MedicineBox.Items.Clear()
+While myreader.Read()
+MedicineBox.Items.Add(myreader("Medicine"))
+End While
+con.Close()
+End Sub
+Sub DisplayData()
+Dim query As String = "SELECT * FROM tblPatient WHERE Username='" & UsernameLabel1.Text & "'"
+Using connect As OleDbConnection = New OleDbConnection("Provider=Microsoft.ACE.OLEDB.12.0;Data Source=C:\Users\User\Desktop\Prototype-WH\WizHealthV2.accdb")
+Using cmd As OleDbCommand = New OleDbCommand(query, connect)
+Using da As New OleDbDataAdapter()
+da.SelectCommand = cmd
+Using dt As New DataTable()
+connect.Open()
+da.Fill(dt)
+If dt.Rows.Count > 0 Then
+PatientIDLabel1.Text = dt.Rows(0)(0).ToString()
+FirstNameLabel1.Text = dt.Rows(0)(3).ToString()
+SurnameLabel1.Text = dt.Rows(0)(4).ToString()
+DateTimePicker1.Text = dt.Rows(0)(43).ToString()
+StatusUpdate.Text = dt.Rows(0)(44).ToString()
+DiagnosisBox.Text = dt.Rows(0)(45).ToString()
+MedicineBox.Text = dt.Rows(0)(47).ToString()
+Quantitybox.Text = dt.Rows(0)(48).ToString()
+DetailsBox.Text = dt.Rows(0)(49).ToString()
+CostBox.Text = dt.Rows(0)(50).ToString()
+End If
+End Using
+connect.Close()
+End Using
+End Using
+End Using
+79
+End Sub
+Private Sub MedicineComboBox_SelectedIndexChanged(sender As Object, e As EventArgs) Handles MedicineBox.SelectedIndexChanged
+Try
+Dim sql As String
+Dim cmd2 As New OleDbCommand
+Dim dt As New DataTable
+Dim da As New OleDbDataAdapter
+con.Open()
+sql = "SELECT * FROM tblMedicine WHERE Medicine LIKE '%" & MedicineBox.Text & "%'"
+cmd2.Connection = con
+cmd2.CommandText = sql
+da.SelectCommand = cmd2
+da.Fill(dt)
+If dt.Rows.Count > 0 Then
+Costbox.Text = dt.Rows(0).Item("Cost").ToString
+End If
+Catch ex As Exception
+Finally
+con.Close()
+End Try
+End Sub
+Private Sub CancelBtn_Click(sender As Object, e As EventArgs) Handles CancelBtn.Click
+Dim exit2 As String
+exit2 = MsgBox("Are you sure you want to cancel update?", MsgBoxStyle.Exclamation + MsgBoxStyle.YesNo, "Cancel")
+If exit2 = vbYes Then
+Me.Close()
+End If
+End Sub
+Private Sub RegisterBtn_Click(sender As Object, e As EventArgs) Handles RegisterBtn.Click
+If MedicineBox.Text = "" Or QuantityBox.Text = "" Or DetailsBox.Text = "" Then
+MessageBox.Show("Please Fill up empty fields", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error)
+Else
+If con.State = ConnectionState.Closed Then
+con.Open()
+End If
+Dim sql2 As String
+Dim prescriptiontext As String
+prescriptiontext = "Diagnosis: " + DiagnosisBox.Text + ". You might want to take medicine such as " + MedicineBox.Text + QuantityBox.Text + " pcs that costs for around " + Costbox.Text + " pesos. " + DetailsBox.Text
+sql2 = "UPDATE tblPatient set [Diagnosis] = '" & DiagnosisBox.Text & "', [Medicine] = '" & MedicineBox.Text & "', [Quantity] = '" & QuantityBox.Text & "', [PrescriptionDetails] = '" & DetailsBox.Text & "', [Cost] = '" & Costbox.Text & "', [Prescription] = '" & prescriptiontext & "'
+WHERE [Username] = '" & UsernameLabel1.Text & "'"
+Using create As New OleDbCommand(sql2, con)
+80
+create.Parameters.AddWithValue("@Diagnosis", OleDbType.VarChar).Value = DiagnosisBox.Text.Trim
+create.Parameters.AddWithValue("@Medicine", OleDbType.VarChar).Value = MedicineBox.Text.Trim
+create.Parameters.AddWithValue("@Quantity", OleDbType.VarChar).Value = QuantityBox.Text.Trim
+create.Parameters.AddWithValue("@PrescriptionDetails", OleDbType.VarChar).Value = DetailsBox.Text.Trim
+create.Parameters.AddWithValue("@Cost", OleDbType.VarChar).Value = Costbox.Text.Trim
+create.Parameters.AddWithValue("@Prescription", OleDbType.VarChar).Value = prescriptiontext
+If create.ExecuteNonQuery Then
+MessageBox.Show("You have submitted the prescription", "Information", MessageBoxButtons.OK, MessageBoxIcon.Information)
+DiagnosisBox.Clear()
+MedicineBox.Items.Clear()
+QuantityBox.Clear()
+DetailsBox.Clear()
+End If
+con.Close()
+End Using
+Me.Close()
+End If
+End Sub
+End Class
+Medicine Form
+Imports System.Data.OleDb
+Public Class MedicineForm
+Dim con As New OleDbConnection
+Dim dbProvider As String = "Provider=Microsoft.ACE.OLEDB.12.0;"
+Dim dbSource As String = "Data Source=C:\Users\acer-pc\Downloads\To-do\projectfinal2\WizHealthV2.accdb"
+Private Sub MedicineForm_Load(sender As Object, e As EventArgs) Handles MyBase.Load
+Me.TblMedicineTableAdapter.Fill(Me.WizHealthV2DataSet.tblMedicine)
+con.ConnectionString = dbProvider & dbSource
+End Sub
+Private Sub Addbtn_Click(sender As Object, e As EventArgs) Handles Addbtn.Click
+TblMedicineBindingSource.AddNew()
+End Sub
+Private Sub Deletebtn_Click(sender As Object, e As EventArgs) Handles Deletebtn.Click
+Try
+Dim result1 As DialogResult
+result1 = MessageBox.Show("Are you sure you want to delete the record?", "Delete Record", MessageBoxButtons.YesNo, MessageBoxIcon.Question)
+If (result1 = DialogResult.Yes) Then
+TblMedicineBindingSource.RemoveCurrent()
+Me.TblMedicineBindingSource.EndEdit()
+Me.TableAdapterManager.UpdateAll(Me.WizHealthV2DataSet)
+81
+Me.TblMedicineTableAdapter.Fill(Me.WizHealthV2DataSet.tblMedicine)
+MessageBox.Show("Record has been deleted", "Delete Record", MessageBoxButtons.OK, MessageBoxIcon.Information)
+Else
+Return
+End If
+Catch ex As Exception
+MessageBox.Show("Delete Failed : " & ex.Message.ToString(), "Delete", MessageBoxButtons.OK, MessageBoxIcon.Error)
+End Try
+End Sub
+Private Sub Savebtn_Click(sender As Object, e As EventArgs) Handles Savebtn.Click
+Try
+Dim result As DialogResult
+result = MessageBox.Show("Do you want to Update the record?", "Update Record", MessageBoxButtons.YesNo, MessageBoxIcon.Question)
+If (result = DialogResult.Yes) Then
+Me.TblMedicineBindingSource.EndEdit()
+Me.TableAdapterManager.UpdateAll(Me.WizHealthV2DataSet)
+Me.TblMedicineTableAdapter.Fill(Me.WizHealthV2DataSet.tblMedicine)
+MessageBox.Show("Record have been updated sucessfully.", "Update Record", MessageBoxButtons.OK, MessageBoxIcon.Information)
+Else
+Return
+End If
+Catch ex As Exception
+MessageBox.Show("Update Failed : " & ex.Message.ToString(), "Update", MessageBoxButtons.OK, MessageBoxIcon.Error)
+End Try
+End Sub
+Private Sub Clearbtn_Click(sender As Object, e As EventArgs) Handles Clearbtn.Click
+MedicineTextbox.Clear()
+CostTextBox.Clear()
+End Sub
+End Class
+Patient Dashboard
+Public Class PatientDashboard
+Private CurrentChildForm As Form
+Private Sub OpenChildForm(childForm As Form)
+If CurrentChildForm IsNot Nothing Then
+CurrentChildForm.Close()
+End If
+CurrentChildForm = childForm
+childForm.TopLevel = False
+childForm.FormBorderStyle = FormBorderStyle.None
+childForm.Dock = DockStyle.Fill
+PatientPanel.Controls.Add(childForm)
+PatientPanel.Tag = childForm
+childForm.BringToFront()
+82
+childForm.Show()
+End Sub
+Private Sub Guna2Button2_Click(sender As Object, e As EventArgs) Handles MedicalHistory.Click
+OpenChildForm(New MyMedicalHistory)
+End Sub
+Private Sub PatientDashboard_Load(sender As Object, e As EventArgs) Handles MyBase.Load
+Timer1.Enabled = True
+End Sub
+Private Sub Timer1_Tick(sender As Object, e As EventArgs) Handles Timer1.Tick
+LblTime.Text = Date.Now.ToString("hh:mm:ss tt")
+LblDate.Text = Date.Now.ToString("dd MMM yyyy")
+End Sub
+Private Sub Guna2Button1_Click(sender As Object, e As EventArgs) Handles MyProfileBtn.Click
+OpenChildForm(New ProfileForm)
+End Sub
+Private Sub ConsultationBtn_Click(sender As Object, e As EventArgs) Handles ConsultationBtn.Click
+OpenChildForm(New Consultation)
+End Sub
+Private Sub Guna2Button5_Click(sender As Object, e As EventArgs) Handles LogoutBtn.Click
+Dim logout As String
+logout = MessageBox.Show("Are you sure you want to logout?", "Logout", MessageBoxButtons.YesNo, MessageBoxIcon.Question)
+If logout = vbYes Then
+Me.Close()
+LoginForm.Show()
+ElseIf logout = vbNo Then
+End If
+End Sub
+Private Sub SettingsBtn_Click(sender As Object, e As EventArgs) Handles SettingsBtn.Click
+OpenChildForm(New AccountSettings)
+End Sub
+Private Sub MinimizeBtn_Click(sender As Object, e As EventArgs) Handles MinimizeBtn.Click
+WindowState = FormWindowState.Minimized
+End Sub
+Private Sub MaximizeBtn_Click(sender As Object, e As EventArgs) Handles MaximizeBtn.Click
+If WindowState = FormWindowState.Normal Then
+WindowState = FormWindowState.Maximized
+Else
+WindowState = FormWindowState.Normal
+End If
+End Sub
+83
+Private Sub CloseBtn_Click(sender As Object, e As EventArgs) Handles CloseBtn.Click
+Dim exit1 As String
+exit1 = MsgBox("Are you sure you want to exit?", MsgBoxStyle.Exclamation + MsgBoxStyle.YesNo, "Exit Application")
+If exit1 = vbYes Then
+Application.Exit()
+ElseIf exit1 = vbNo Then
+End If
+End Sub
+End Class
+Patient Profile (User Side)
+Imports System.Data.OleDb
+Public Class ProfileForm
+Public Shared userkey
+Dim connect As New OleDbConnection
+Dim dbProvider As String = "Provider=Microsoft.ACE.OLEDB.12.0;"
+Dim dbSource As String = "Data Source=C:\Users\User\Desktop\Prototype-WH\WizHealthV2.accdb"
+Private Sub ProfileForm_Load(sender As Object, e As EventArgs) Handles MyBase.Load
+UsernameLabel1.Text = userkey
+DisplayProfile()
+End Sub
+Sub DisplayProfile()
+Dim query As String = "SELECT * FROM tblPatient WHERE Username='" & UsernameLabel1.Text & "'"
+Using connect As OleDbConnection = New OleDbConnection("Provider=Microsoft.ACE.OLEDB.12.0;Data Source=C:\Users\User\Desktop\Prototype-WH\WizHealthV2.accdb")
+Using cmd As OleDbCommand = New OleDbCommand(query, connect)
+Using da As New OleDbDataAdapter()
+da.SelectCommand = cmd
+Using dt As New DataTable()
+connect.Open()
+da.Fill(dt)
+If dt.Rows.Count > 0 Then
+PatientIDLabel1.Text = dt.Rows(0)(0).ToString()
+UsernameLabel1.Text = dt.Rows(0)(1).ToString()
+FirstNameLabel1.Text = dt.Rows(0)(3).ToString()
+SurnameLabel1.Text = dt.Rows(0)(4).ToString()
+GenderLabel1.Text = dt.Rows(0)(5).ToString()
+DateofBirthLabel1.Text = dt.Rows(0)(6).ToString()
+CivilStatusLabel1.Text = dt.Rows(0)(7).ToString()
+NumberLabel1.Text = dt.Rows(0)(8).ToString()
+EmailLabel1.Text = dt.Rows(0)(9).ToString()
+AddressLabel1.Text = dt.Rows(0)(10).ToString()
+OccupationLabel1.Text = dt.Rows(0)(11).ToString()
+End If
+84
+End Using
+connect.Close()
+End Using
+End Using
+End Using
+End Sub
+Private Sub btnUpdate_Click(sender As Object, e As EventArgs) Handles btnUpdate.Click
+EditProfile.ShowDialog()
+End Sub
+End Class
+Edit Profile
+Imports System.Data.OleDb
+Public Class EditProfile
+Public Shared userkey1
+Dim connect As New OleDbConnection
+Dim dbProvider As String = "Provider=Microsoft.ACE.OLEDB.12.0;"
+Dim dbSource As String = "Data Source=C:\Users\User\Desktop\Prototype-WH\WizHealthV2.accdb"
+Private Sub EditProfile_Load(sender As Object, e As EventArgs) Handles MyBase.Load
+UsernameLabel2.Text = userkey1
+connect.ConnectionString = dbProvider & dbSource
+DisplayProfile()
+End Sub
+Sub DisplayProfile()
+Dim query As String = "SELECT * FROM tblPatient WHERE Username='" & UsernameLabel2.Text & "'"
+Using connect As OleDbConnection = New OleDbConnection("Provider=Microsoft.ACE.OLEDB.12.0;Data Source=C:\Users\User\Desktop\Prototype-WH\WizHealthV2.accdb")
+Using cmd As OleDbCommand = New OleDbCommand(query, connect)
+Using da As New OleDbDataAdapter()
+da.SelectCommand = cmd
+Using dt As New DataTable()
+connect.Open()
+da.Fill(dt)
+If dt.Rows.Count > 0 Then
+PatientIDLabel1.Text = dt.Rows(0)(0).ToString()
+UsernameLabel2.Text = dt.Rows(0)(1).ToString()
+FirstNameTextBox.Text = dt.Rows(0)(3).ToString()
+SurnameTextBox.Text = dt.Rows(0)(4).ToString()
+GenderComboBox.Text = dt.Rows(0)(5).ToString()
+DateofBirthDateTimePicker.Value = dt.Rows(0)(6).ToString()
+CivilStatusComboBox.Text = dt.Rows(0)(7).ToString()
+85
+NumberTextBox.Text = dt.Rows(0)(8).ToString()
+EmailTextBox.Text = dt.Rows(0)(9).ToString()
+AddressTextBox.Text = dt.Rows(0)(10).ToString()
+OccupationTextBox.Text = dt.Rows(0)(11).ToString()
+End If
+End Using
+connect.Close()
+End Using
+End Using
+End Using
+End Sub
+Private Sub Guna2Button1_Click(sender As Object, e As EventArgs) Handles Guna2Button1.Click
+Dim exit2 As String
+exit2 = MsgBox("Are you sure you want to cancel update?", MsgBoxStyle.Exclamation + MsgBoxStyle.YesNo, "Cancel")
+If exit2 = vbYes Then
+Me.Close()
+End If
+End Sub
+Private Sub btnUpdate_Click(sender As Object, e As EventArgs) Handles btnUpdate.Click
+If NumberTextBox.Text.Length < 11 Or NumberTextBox.Text.Length > 11 Then
+MessageBox.Show("Phone number must be 11 digits long", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error)
+NumberTextBox.Focus()
+Else
+Dim result As DialogResult
+result = MessageBox.Show("Do you want to Update your Profile?", "Update Record", MessageBoxButtons.YesNo, MessageBoxIcon.Question)
+If (result = DialogResult.Yes) Then
+Dim command As String
+command = "UPDATE tblPatient set [FirstName]='" & FirstNameTextBox.Text & "',[Surname]='" & SurnameTextBox.Text & "', [Gender]='" & GenderComboBox.Text & "', [DateofBirth]= '" & DateofBirthDateTimePicker.Value & "', [CivilStatus]='" & CivilStatusComboBox.Text & "'
+,[Number]='" & NumberTextBox.Text & "',[Email]='" & EmailTextBox.Text & "', [Address]='" & AddressTextBox.Text & "', [Occupation]='" & OccupationTextBox.Text & "' WHERE [Username]='" & UsernameLabel2.Text & "'"
+Using connect As OleDbConnection = New OleDbConnection("Provider=Microsoft.ACE.OLEDB.12.0;Data Source=C:\Users\User\Desktop\Prototype-WH\WizHealthV2.accdb")
+Using cmd As New OleDbCommand(command, connect)
+connect.Open()
+cmd.Parameters.Add("@FirstName", OleDbType.VarChar).Value = FirstNameTextBox.Text
+cmd.Parameters.Add("@Surname", OleDbType.VarChar).Value = SurnameTextBox.Text
+cmd.Parameters.Add("@Gender", OleDbType.VarChar).Value = GenderComboBox.Text
+cmd.Parameters.Add("@DateofBirth", OleDbType.VarChar).Value = DateofBirthDateTimePicker.Value
+cmd.Parameters.Add("@CivilStatus", OleDbType.VarChar).Value = CivilStatusComboBox.Text
+cmd.Parameters.Add("@Number", OleDbType.VarChar).Value = NumberTextBox.Text
+86
+cmd.Parameters.Add("@Email", OleDbType.VarChar).Value = EmailTextBox.Text
+cmd.Parameters.Add("@Address", OleDbType.VarChar).Value = AddressTextBox.Text
+cmd.Parameters.Add("@Occupation", OleDbType.VarChar).Value = OccupationTextBox.Text
+Try
+Dim rowsadded = cmd.ExecuteNonQuery()
+If rowsadded > 0 Then
+MessageBox.Show("Record updated successfully", "Sucess", MessageBoxButtons.OK, MessageBoxIcon.Information)
+connect.Close()
+End If
+Catch ex As Exception
+MsgBox(ex.Message)
+End Try
+End Using
+Me.Close()
+End Using
+Else
+Return
+End If
+End If
+End Sub
+End Class
+Medical History
+Imports System.Data.OleDb
+Public Class MyMedicalHistory
+Public Shared userkey3
+Dim connect As New OleDbConnection
+Dim dbProvider As String = "Provider=Microsoft.ACE.OLEDB.12.0;"
+Dim dbSource As String = "Data Source=C:\Users\User\Desktop\Prototype-WH\WizHealthV2.accdb"
+Private Sub MyMedicalHistory_Load(sender As Object, e As EventArgs) Handles MyBase.Load
+UsernameLabel1.Text = userkey3
+DisplayRecord()
+End Sub
+Sub DisplayRecord()
+Dim query As String = "SELECT * FROM tblPatient WHERE Username='" & UsernameLabel1.Text & "'"
+Using connect As OleDbConnection = New OleDbConnection("Provider=Microsoft.ACE.OLEDB.12.0;Data Source=C:\Users\User\Desktop\Prototype-WH\WizHealthV2.accdb")
+Using cmd As OleDbCommand = New OleDbCommand(query, connect)
+Using da As New OleDbDataAdapter()
+da.SelectCommand = cmd
+Using dt As New DataTable()
+connect.Open()
+da.Fill(dt)
+87
+If dt.Rows.Count > 0 Then
+PatientIDLabel1.Text = dt.Rows(0)(0).ToString()
+UsernameLabel1.Text = dt.Rows(0)(1).ToString()
+FirstNameLabel1.Text = dt.Rows(0)(3).ToString()
+SurnameLabel1.Text = dt.Rows(0)(4).ToString()
+TobaccoLabel1.Text = dt.Rows(0)(12).ToString()
+DrugsLabel1.Text = dt.Rows(0)(13).ToString()
+AlcoholLabel1.Text = dt.Rows(0)(14).ToString()
+RecentMedicationLabel1.Text = dt.Rows(0)(15).ToString()
+MedicationListTextBox.Text = dt.Rows(0)(16).ToString()
+AllergiesLabel1.Text = dt.Rows(0)(17).ToString()
+MedicationAllergiesTextbox.Text = dt.Rows(0)(18).ToString()
+SurgeryLabel1.Text = dt.Rows(0)(19).ToString()
+SurgeryListTextbox.Text = dt.Rows(0)(20).ToString()
+FeverLabel1.Text = dt.Rows(0)(21).ToString()
+HeadacheLabel1.Text = dt.Rows(0)(22).ToString()
+SorethroatLabel1.Text = dt.Rows(0)(23).ToString()
+CoughLabel1.Text = dt.Rows(0)(24).ToString()
+RunnyNoseLabel1.Text = dt.Rows(0)(25).ToString()
+LossofSmell_TasteLabel1.Text = dt.Rows(0)(26).ToString()
+ShortnessofBreathLabel1.Text = dt.Rows(0)(27).ToString()
+ChestPainLabel1.Text = dt.Rows(0)(28).ToString()
+NauseaLabel1.Text = dt.Rows(0)(29).ToString()
+LossofAppetiteLabel1.Text = dt.Rows(0)(30).ToString()
+CardiacDiseaseLabel1.Text = dt.Rows(0)(31).ToString()
+HypertensionLabel1.Text = dt.Rows(0)(32).ToString()
+HIVInfectionLabel1.Text = dt.Rows(0)(33).ToString()
+DiabetesLabel1.Text = dt.Rows(0)(34).ToString()
+AsthmaLabel1.Text = dt.Rows(0)(35).ToString()
+SevereObesityLabel1.Text = dt.Rows(0)(36).ToString()
+PregnantLabel1.Text = dt.Rows(0)(37).ToString()
+ChronicKidneyDiseaseLabel1.Text = dt.Rows(0)(38).ToString()
+ChronicLiverDiseaseLabel1.Text = dt.Rows(0)(39).ToString()
+ImmunosuppressiveConLabel1.Text = dt.Rows(0)(40).ToString()
+OtherConditionsLabel1.Text = dt.Rows(0)(41).ToString()
+Label3.Text = dt.Rows(0)(42).ToString()
+End If
+End Using
+connect.Close()
+End Using
+End Using
+End Using
+End Sub
+Private Sub btnUpdate_Click(sender As Object, e As EventArgs) Handles btnUpdate.Click
+MedicalHistoryForm.ShowDialog()
+End Sub
+End Class
+Account Settings
+Imports System.Data.OleDb
+Public Class AccountSettings
+Public Shared userkey2
+88
+Dim connect As OleDbConnection = New OleDbConnection("Provider=Microsoft.ACE.OLEDB.12.0;Data Source=C:\Users\User\Desktop\Prototype-WH\WizHealthV2.accdb")
+Private Sub AccountSettings_Load(sender As Object, e As EventArgs) Handles MyBase.Load
+UsernameTextBox.Text = userkey2
+DisplayPassword()
+End Sub
+Sub DisplayPassword()
+Dim query As String = "SELECT * FROM tblPatient WHERE Username='" & UsernameTextBox.Text & "'"
+Using connect As OleDbConnection = New OleDbConnection("Provider=Microsoft.ACE.OLEDB.12.0;Data Source=C:\Users\User\Desktop\Prototype-WH\WizHealthV2.accdb")
+Using cmd As OleDbCommand = New OleDbCommand(query, connect)
+Using da As New OleDbDataAdapter()
+da.SelectCommand = cmd
+Using dt As New DataTable()
+connect.Open()
+da.Fill(dt)
+If dt.Rows.Count > 0 Then
+UsernameTextBox.Text = dt.Rows(0)(1).ToString()
+PasswordTextbox.Text = dt.Rows(0)(2).ToString()
+End If
+End Using
+connect.Close()
+End Using
+End Using
+End Using
+End Sub
+Private Sub Guna2Button1_Click(sender As Object, e As EventArgs) Handles Guna2Button1.Click
+If PasswordTextbox.Text = Nothing Or ConfirmPass.Text = Nothing Then
+MessageBox.Show("Please enter the required fields!", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error)
+PasswordTextbox.Focus()
+ConfirmPass.Focus()
+End If
+If PasswordTextbox.Text = ConfirmPass.Text Then
+Dim result As DialogResult
+result = MessageBox.Show("Do you want to Update your record? (Application Restart is necessary)", "Update Record", MessageBoxButtons.YesNo, MessageBoxIcon.Question)
+If (result = DialogResult.Yes) Then
+Dim command As String
+command = "UPDATE tblPatient set [Password]='" & PasswordTextbox.Text & "' WHERE [Username]='" & UsernameTextBox.Text & "'"
+Using connect As OleDbConnection = New OleDbConnection("Provider=Microsoft.ACE.OLEDB.12.0;Data Source=C:\Users\User\Desktop\Prototype-WH\WizHealthV2.accdb")
+Using cmd As New OleDbCommand(command, connect)
+89
+connect.Open()
+cmd.Parameters.Add("@Username", OleDbType.VarChar).Value = UsernameTextBox.Text
+cmd.Parameters.Add("@Password", OleDbType.VarChar).Value = PasswordTextbox.Text
+Try
+Dim rowsadded = cmd.ExecuteNonQuery()
+If rowsadded > 0 Then
+MessageBox.Show("Password has been changed successfully", "Sucess", MessageBoxButtons.OK, MessageBoxIcon.Information)
+connect.Close()
+End If
+Catch ex As Exception
+MsgBox(ex.Message)
+End Try
+End Using
+Application.Restart()
+End Using
+Else
+Return
+End If
+Else
+MessageBox.Show("Password do not match", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error)
+End If
+End Sub
+Private Sub CheckBox1_CheckedChanged_1(sender As Object, e As EventArgs) Handles CheckBox1.CheckedChanged
+If CheckBox1.Checked = True Then
+PasswordTextbox.UseSystemPasswordChar = False
+Else
+PasswordTextbox.UseSystemPasswordChar = True
+End If
+End Sub
+Private Sub CheckBox2_CheckedChanged(sender As Object, e As EventArgs) Handles CheckBox2.CheckedChanged
+If CheckBox2.Checked = True Then
+ConfirmPass.UseSystemPasswordChar = False
+Else
+ConfirmPass.UseSystemPasswordChar = True
+End If
+End Sub
+End Class
